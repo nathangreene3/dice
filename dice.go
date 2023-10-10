@@ -1,6 +1,7 @@
 package dice
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 )
@@ -54,18 +55,18 @@ func (d Die) Min(count int) int {
 
 // Parse returns a die parsed from a string.
 func Parse(s string) (Die, error) {
-	if len(s) < 2 || s[0] != 'D' {
-		err := strconv.NumError{
-			Func: "Parse",
-			Num:  s,
-			Err:  strconv.ErrSyntax,
-		}
+	const errFmt = "failed to parse %q: %w"
 
-		return 0, &err
+	if len(s) < 2 || s[0] != 'D' {
+		return 0, fmt.Errorf(errFmt, s, ErrInvalidFmt)
 	}
 
 	d, err := strconv.Atoi(s[1:])
-	return Die(d), err
+	if err != nil {
+		return 0, fmt.Errorf(errFmt, s, ErrInvalidFmt)
+	}
+
+	return Die(d), nil
 }
 
 // Roll returns the sum of a given number of dice rolls.
