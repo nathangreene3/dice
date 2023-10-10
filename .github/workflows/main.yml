@@ -7,5 +7,4 @@ on:
 
 jobs:
   unit-tests:
-    - name: Run unit tests
-      uses: ./github/workflows/unit_tests.yml
+    uses: ./.github/workflows/unit_tests.yml

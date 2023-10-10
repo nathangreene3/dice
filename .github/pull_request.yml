@@ -1,9 +1,0 @@
-name: Pull Request
-
-on:
-  pull_request:
-
-jobs:
-  unit-tests:
-    - uses: ./.github/workflows/unit_tests.yml
-    - uses: ./.github/workflows/linter.yml
