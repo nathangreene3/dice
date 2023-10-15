@@ -1,9 +1,12 @@
 package zdice
 
 import (
+	"errors"
 	"math/rand"
 	"testing"
 	"time"
+
+	. "github.com/onsi/gomega"
 )
 
 // Testing random things is hard.
@@ -61,27 +64,44 @@ func TestMaxMinObserved(t *testing.T) {
 }
 
 func TestParseString(t *testing.T) {
-	tests := map[ZDie]string{
-		0:    "Z0",
-		1:    "Z1",
-		Z4:   "Z4",
-		Z6:   "Z6",
-		Z8:   "Z8",
-		Z10:  "Z10",
-		Z12:  "Z12",
-		Z20:  "Z20",
-		Z100: "Z100",
-	}
+	g := NewWithT(t)
 
-	for z, s := range tests {
-		if rec, err := Parse(s); err != nil {
-			t.Error(err)
-		} else if rec != z {
-			t.Errorf("expected %d\nreceived %d\n", z, rec)
+	{
+		goodDiceStrings := map[ZDie]string{
+			0:    "Z0",
+			1:    "Z1",
+			Z4:   "Z4",
+			Z6:   "Z6",
+			Z8:   "Z8",
+			Z10:  "Z10",
+			Z12:  "Z12",
+			Z20:  "Z20",
+			Z100: "Z100",
 		}
 
-		if rec := z.String(); s != rec {
-			t.Errorf("expected %q\nreceived %q\n", s, rec)
+		for z, s := range goodDiceStrings {
+			rz, err := Parse(s)
+			g.Expect(err).To(BeNil())
+			g.Expect(rz).To(Equal(z))
+
+			rs := z.String()
+			g.Expect(rs).To(Equal(s))
+		}
+	}
+
+	{
+		badDiceStrings := []string{
+			"",
+			"Z",
+			"0",
+			" Z0",
+			"Z0 ",
+		}
+
+		for _, s := range badDiceStrings {
+			z, err := Parse(s)
+			g.Expect(errors.Is(err, ErrInvalidFmt)).To(BeTrue())
+			g.Expect(z).To(BeZero())
 		}
 	}
 }
