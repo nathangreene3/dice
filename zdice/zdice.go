@@ -1,6 +1,7 @@
 package zdice
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 )
@@ -54,18 +55,18 @@ func (z ZDie) Min(count int) int {
 
 // Parse returns a die parsed from a string.
 func Parse(s string) (ZDie, error) {
-	if len(s) < 2 || s[0] != 'Z' {
-		err := strconv.NumError{
-			Func: "Parse",
-			Num:  s,
-			Err:  strconv.ErrSyntax,
-		}
+	const errFmt = "failed to parse %q: %w"
 
-		return 0, &err
+	if len(s) < 2 || s[0] != 'Z' {
+		return 0, fmt.Errorf(errFmt, s, ErrInvalidFmt)
 	}
 
 	z, err := strconv.Atoi(s[1:])
-	return ZDie(z), err
+	if err != nil {
+		return 0, fmt.Errorf(errFmt, s, ErrInvalidFmt)
+	}
+
+	return ZDie(z), nil
 }
 
 // Roll returns the sum of a given number of dice rolls.

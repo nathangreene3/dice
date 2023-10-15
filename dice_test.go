@@ -1,9 +1,12 @@
 package dice
 
 import (
+	"errors"
 	"math/rand"
 	"testing"
 	"time"
+
+	. "github.com/onsi/gomega"
 )
 
 // Testing random things is hard.
@@ -61,27 +64,44 @@ func TestMaxMinObserved(t *testing.T) {
 }
 
 func TestParseString(t *testing.T) {
-	tests := map[Die]string{
-		0:    "D0",
-		1:    "D1",
-		D4:   "D4",
-		D6:   "D6",
-		D8:   "D8",
-		D10:  "D10",
-		D12:  "D12",
-		D20:  "D20",
-		D100: "D100",
-	}
+	g := NewWithT(t)
 
-	for d, s := range tests {
-		if rec, err := Parse(s); err != nil {
-			t.Error(err)
-		} else if rec != d {
-			t.Errorf("expected %d\nreceived %d\n", d, rec)
+	{
+		goodDiceStrings := map[Die]string{
+			0:    "D0",
+			1:    "D1",
+			D4:   "D4",
+			D6:   "D6",
+			D8:   "D8",
+			D10:  "D10",
+			D12:  "D12",
+			D20:  "D20",
+			D100: "D100",
 		}
 
-		if rec := d.String(); s != rec {
-			t.Errorf("expected %q\nreceived %q\n", s, rec)
+		for d, s := range goodDiceStrings {
+			rd, err := Parse(s)
+			g.Expect(err).To(BeNil())
+			g.Expect(rd).To(Equal(d))
+
+			rs := d.String()
+			g.Expect(rs).To(Equal(s))
+		}
+	}
+
+	{
+		badDiceStrings := []string{
+			"",
+			"D",
+			"0",
+			" D0",
+			"D0 ",
+		}
+
+		for _, s := range badDiceStrings {
+			d, err := Parse(s)
+			g.Expect(errors.Is(err, ErrInvalidFmt)).To(BeTrue())
+			g.Expect(d).To(BeZero())
 		}
 	}
 }
